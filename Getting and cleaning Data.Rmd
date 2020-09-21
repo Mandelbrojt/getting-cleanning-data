@@ -1,0 +1,55 @@
+---
+title: "Getting and Cleaning Data"
+author: "Luis Moreno"
+date: "9/21/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Note: the `echo = FALSE` parameter is added to the code chunk to prevent printing of the R code.
+
+## Reading Excel files
+```{r}
+fileURL <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.xlsx?accessType=DOWNLOAD"
+download.file(fileURL, destfile = "./data/cameras.xlsx", method = "curl")
+dateDownloaded <- date()
+```
+
+### read.xlsx()
+This function allows the user to read data from an Excel worksheet. It provides the conveniency of read.table by borrowing from its signature.  
+
+### Main arguments for read.xlsx function
+```{reading_xlsx, include = TRUE}
+library(xlsx)
+str(read.xlsx)
+```
+  
+**file**: the path to the file to read.  
+**sheetIndex**: a number representing the sheet index in the workbook.  
+**sheetName**: a character string with the sheet name.  
+**rowIndex**: a numeric vector indicating the rows you want to extract.  
+**colIndex**: a numeric vector indicating the cols you want to extract.  
+**head**: a logical value indicating whether the first row corresponding to the first element of the *rowIndex* vector contains the names of the variables
+
+```{r}
+colIndex <- 2:3
+rowIndex <- 1:4
+cameraDataSubset <- read.xlsx("./data/cameras.xlsx", sheetIndex = 1,
+                              colIndex = colIndex, rowIndex = rowIndex)
+cameraDataSubset
+```
+
+### Further Notes  
+**write.xlsx**: it will write out an Excel file with similar arguments.  
+**read.xlsx2**: it is faster than read.xsls but for reading subsets of rows is more unstable.  
+**XLConnect**: this package has more options for writing and manipulating Excel files.  
+**XLConnect vignette**: is a good place to start for that package.  
+**Advise**: it is better to store data into a database or in comma separated files (.csv) or tab separated files (.tab/.txt).  
+
+## Reading XML files
+### XML
+XML is the abbreviation for "Extensible Markup Language". It is frequently used to store *structured data*, particularly in internet applications.  
+Its components are:  
