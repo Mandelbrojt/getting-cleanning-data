@@ -64,8 +64,8 @@ Its components are:
   
 ```{Reading XML}
 library(XML)
-fileURL <- "https://www.w3schools.com/xml/simple.xml"
-doc <- xmlTreeParse("./data/cameras.xml", useInternalNodes = TRUE)
+doc <- xmlTreeParse(fileURL, useInternalNodes = TRUE)
+rootNode <- xmlRoot(doc)
 xmlName(rootNode)
 names(rootNode)
 ```
@@ -78,7 +78,7 @@ rootNode[[1]][[1]][[1]][[1]]
 ```
 
 ### Programatically extract objects from an XML file
-If your variable (in this example the "rootNode") contains the entire XML, the this function will go through every single tagged element in the entire document. Generally, it will return all the text inside the XML file.
+If your variable (in this example the "rootNode") contains the entire XML, then this function will go through every single tagged element in the entire document. Generally, it will return all the text inside the XML file.
 ```{r}
 xmlSApply(rootNode, xmlValue)
 ```
@@ -88,4 +88,9 @@ xmlSApply(rootNode, xmlValue)
 - //node: returns a node at any level.  
 - node[@attr-name]: returns a node with an attribute name.  
 - node[@attr-name='bob']: returns a node with an attribute name 'bob'.  
+
+```{r}
+## Extract all values from an specific sub-element
+xpathSApply(rootNode, "//SaldoActual", xmlValue)
+```
 
