@@ -64,8 +64,7 @@ Its components are:
   
 ```{Reading XML}
 library(XML)
-fileURL <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.xml?accessType=DOWNLOAD"
-download.file(fileURL, destfile = "./data/cameras.xml", method = "curl")
+fileURL <- "https://www.w3schools.com/xml/simple.xml"
 doc <- xmlTreeParse("./data/cameras.xml", useInternalNodes = TRUE)
 xmlName(rootNode)
 names(rootNode)
@@ -89,3 +88,4 @@ xmlSApply(rootNode, xmlValue)
 - //node: returns a node at any level.  
 - node[@attr-name]: returns a node with an attribute name.  
 - node[@attr-name='bob']: returns a node with an attribute name 'bob'.  
+
