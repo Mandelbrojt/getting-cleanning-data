@@ -53,3 +53,39 @@ cameraDataSubset
 ### XML
 XML is the abbreviation for "Extensible Markup Language". It is frequently used to store *structured data*, particularly in internet applications.  
 Its components are:  
+ - Markup: labels that give the text structure.  
+ - Content: the actual text of the document.  
+ 
+ ### Tags, elements and attributes
+  - Start tags: <section>  
+  - End tags: </section>  
+  - Empty tags: <line-break>  
+  - Attributes: <step number="3"> Connect A to B. </step>  
+  
+```{Reading XML}
+library(XML)
+fileURL <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.xml?accessType=DOWNLOAD"
+download.file(fileURL, destfile = "./data/cameras.xml", method = "curl")
+doc <- xmlTreeParse("./data/cameras.xml", useInternalNodes = TRUE)
+xmlName(rootNode)
+names(rootNode)
+```
+
+### Accessing parts of the XML document with square brackets
+```{r}
+rootNode[[1]]
+rootNode[[1]][[1]]
+rootNode[[1]][[1]][[1]][[1]]
+```
+
+### Programatically extract objects from an XML file
+If your variable (in this example the "rootNode") contains the entire XML, the this function will go through every single tagged element in the entire document. Generally, it will return all the text inside the XML file.
+```{r}
+xmlSApply(rootNode, xmlValue)
+```
+
+### XPath Language
+- /node: returns the top level node.  
+- //node: returns a node at any level.  
+- node[@attr-name]: returns a node with an attribute name.  
+- node[@attr-name='bob']: returns a node with an attribute name 'bob'.  
