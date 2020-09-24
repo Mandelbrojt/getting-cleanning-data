@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Note: the `echo = FALSE` parameter is added to the code chunk to prevent printing of the R code.
 
 ## Reading Excel files
-```{r}
+```{r, eval = FALSE}
 fileURL <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.xlsx?accessType=DOWNLOAD"
 download.file(fileURL, destfile = "./data/cameras.xlsx", method = "curl")
 dateDownloaded <- date()
@@ -22,7 +22,7 @@ dateDownloaded <- date()
 This function allows the user to read data from an Excel worksheet. It provides the conveniency of read.table by borrowing from its signature.  
 
 ### Main arguments for read.xlsx function
-```{reading_xlsx, include = TRUE}
+```{reading_xlsx, eval = FALSE}
 library(xlsx)
 str(read.xlsx)
 ```
@@ -34,7 +34,7 @@ str(read.xlsx)
 **colIndex**: a numeric vector indicating the cols you want to extract.  
 **head**: a logical value indicating whether the first row corresponding to the first element of the *rowIndex* vector contains the names of the variables
 
-```{r}
+```{r, eval = FALSE}
 colIndex <- 2:3
 rowIndex <- 1:4
 cameraDataSubset <- read.xlsx("./data/cameras.xlsx", sheetIndex = 1,
@@ -53,3 +53,125 @@ cameraDataSubset
 ### XML
 XML is the abbreviation for "Extensible Markup Language". It is frequently used to store *structured data*, particularly in internet applications.  
 Its components are:  
+ - Markup: labels that give the text structure.  
+ - Content: the actual text of the document.  
+ 
+ [XML Tutorial](https://www.w3schools.com/xml/)
+ 
+ ### Tags, elements and attributes
+  - Start tags: <section>  
+  - End tags: </section>  
+  - Empty tags: <line-break>  
+  - Attributes: <step number="3"> Connect A to B. </step>  
+  
+```{Reading XML, eval = FALSE}
+library(XML)
+fileURL <- "./data/yuri_piquet.xml"
+doc <- xmlTreeParse(fileURL, useInternalNodes = TRUE)
+rootNode <- xmlRoot(doc)
+xmlName(rootNode)
+names(rootNode)
+```
+Setting "useInternalNodes" to TRUE, allows us to obtain all internal nodes from the XML file.
+
+### Accessing parts of the XML document with square brackets
+```{r, eval = FALSE}
+rootNode[[1]]
+rootNode[[1]][[1]]
+rootNode[[1]][[1]][[1]][[1]]
+```
+
+### Programatically extract objects from an XML file
+If your variable (in this example the "rootNode") contains the entire XML, then this function will go through every single tagged element in the entire document. Generally, it will return all the text inside the XML file.
+```{r, eval = FALSE}
+## Extract all text from the XML file
+xmlSApply(rootNode, xmlValue)
+```
+
+### XPath Language
+- /node: returns the top level node.  
+- //node: returns a node at any level.  
+- node[@attr-name]: returns a node with an attribute name.  
+- node[@attr-name='bob']: returns a node with an attribute name 'bob'.  
+
+```{r, eval = FALSE}
+## Extract all values from an specific node
+xpathSApply(rootNode, "//SaldoActual", xmlValue)
+xpathSApply(doc, "//NombreOtorgante", xmlValue)
+xpathSApply(doc, "//CreditoMaximo", xmlValue)
+```
+
+## Reading HTML source code
+```{r, eval = FALSE}
+fileURL <- "https://www.espn.com/nfl/team/_/name/bal/baltimore-ravens"
+doc <- htmlTreeParse(fileURL, useInternal = TRUE)
+## Look for elements that are list items that have a particular class
+scores <- xpathSApply(doc, "//li[@class='score']", xmlValue)
+teams <- xpathSApply(doc, "//li[@class='team-name']", xmlValue)
+```
+
+## Reading JSON
+JSON stands for "Javascript Object Notation", ant it is used for lightweight data storage. It is similar in structure to XML files but different syntax/format.  
+Data on JSON can be stored as:  
+- Numbers  
+- Strings  
+- Boolean  
+- Array  
+- Object  
+
+[More on JSON](https://en.wikipedia.org/wiki/JSON)  
+
+### Reading data with jsonlite package
+```{r, eval = FALSE}
+library(jsonlite)
+## Read a JSON file for APPLE stock candle quotes from Finnhub
+jsonData <- fromJSON("https://finnhub.io/api/v1/stock/candle?symbol=AAPL&resolution=1&from=1572651390&to=1572910590&token=br08q97rh5r9j5ovs4fg")
+## Obtain the names in the JSON file
+names(jsonData)
+## Obtain nested objects in JSON
+names(jsonData$c)
+```
+
+### Writing data frames into JSON
+```{r, eval = FALSE}
+## Convert a data frame in R into JSON format
+myjson <- toJSON(iris, pretty = TRUE)
+cat(myjson)
+## Convert back to JSON
+iris2 <- fromJSON(myjson)
+head(iris2)
+```
+
+### Further resources
+[JSON Official Website](https://www.json.org/json-en.html)
+[JSON Tutorial](https://www.r-bloggers.com/2013/12/new-package-jsonlite-a-smarter-json-encoderdecoder/)
+
+## The data.table Package
+All functions that accept data.frame can be applied over data.table.  
+This package is written in C, making it much faster for subsetting, grouping, updating, among other.  
+```{r, eval = FALSE}
+library(data.table)
+## Create a data frame using data.frame method
+DF = data.frame(x = rnorm(9), y = rep(c("a", "b", "c"), each = 3), z = rnorm(9))
+head(DF, 3)
+
+## Create a data table using data.table method
+DF = data.table(x = rnorm(9), y = rep(c("a", "b", "c"), each = 3), z = rnorm(9))
+head(DF, 3)
+
+## See all the data tables in memory
+tables()
+
+## Subsetting rows
+DT[2, ]
+DT[DT$y='a']
+DT[c(2,3)]
+
+```
+
+### Subsetting in data.table
+- Subsettinf function is modified for data.table.  
+- The argument after the comma is called an "expression".  
+- In R, an expression is a collection of statements encolsed in curley brackets.  
+
+### Calculating values for variables with expressions
