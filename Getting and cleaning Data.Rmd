@@ -322,5 +322,106 @@ hg19 <- dbConnect(MySQL(), user = "genome", db = "hg19",
                   host = "genome-mysql.cse.ucsc.edu")
 allTables <- dbListTables(hg19)
 length(allTables)
+allTables[1:5]
 ```
 
+### Getting dimensions of a specific table  
+```{r, eval = FALSE}
+dbListFields(hg19, "affyU133Plus2")
+```
+### Executing queries
+```{r, eval = FALSE}
+dbGetQuery(hg19, "select count(*) from affyU133Plus2")
+```
+### Reading from a table
+```{r, eval = FALSE}
+affyData <- dbReadTable(hg19, "affyU133Plus2")
+head(affyData)
+```
+### Select a specific subset
+```{r, eval = FALSE}
+query <- dbSendQuery(hg19, "SELECT * FROM affyU133Plus2 WHERE misMatches BETWEEN 1 AND 3")
+affyMis <- fetch(query); quantile(affyMis$misMatches)
+affyMisSmall <- fetch(query, n = 10); dbClearResult(query);
+dim(affyMisSmall)
+dbDisconnect(hg19)
+```
+NOTE: Every time a connection is done using, it must be closed with the dbDisconnect() function.  
+
+### Further Reading  
+RMySQL Vignette: https://cran.r-project.org/web/packages/RMySQL/RMySQL.pdf  
+Lis of commands: https://www.pantz.org/software/mysql/mysqlcommands.html  
+Other resources: https://www.r-bloggers.com/2011/08/mysql-and-r/  
+
+## HDF5
+The Hierarchical Data Format (HDF) is a set of files (HDF4, HDF5) designed to organize and store large amounts of data. 
+The rhdf5 package is thus suited for the exchange of large and/or complex datasets between R and other software package, and for letting R applications work on datasets that are larger than the available RAM.  
+Groups that contain zero or more data sets and metadata:  
+- Have a **group header** with a group name and list attributes.  
+- Have a **group symbol table** with a list of objects in group.  
+Datasets multidimensional array of data elements with metadata  
+- Have a header with name, datatype, dataspace, and storage layout  
+- Have a data array with the data  
+### HDF5 R Package  
+ 
+```{r, eval = FALSE}
+# Install R HDF5 Package
+source("http://bioconductor.org/biocLite.R")
+biocLite("rhdf5")
+
+# If there is an error with R version try installing with
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(version = "3.11")
+
+BiocManager::install("rhdf5")
+
+# Load HDF5 Package
+library(rhdf5)
+created = h5createFile("example.h5")
+created
+
+# More information on rhdf5
+browseVignettes("rhdf5")
+```
+
+### Creating groups in rhdf5
+```{r, eval = FALSE}
+created = h5createGroup("example.h5", "foo")
+created = h5createGroup("example.h5", "baa")
+created = h5createGroup("example.h5", "foo/foobaa")
+h5ls("example.h5")
+```
+
+### Writting groups in rhdf5
+```{r,eval = FALSE}
+A = matrix(1:10, nrow = 5, ncol = 2)
+h5write(A, "example.h5", "foo/A")
+
+B = array(seq(0.1, 2.0, by = 0.1), dim = c(5,2,2))
+attr(B, "scale") <- "liter"
+h5write(B, "example.h5", "foo/foobaa/B")
+h5ls("example.h5")
+```
+
+### Writting data sets
+```{r,eval = FALSE}
+df = data.frame(1L:5L, seq(0, 1, length.out = 5),
+                c("ab", "cde", "fghi", "a", "s"), stringsAsFactors = FALSE)
+h5write(df, "example.h5", "df")
+h5ls("example.h5")
+```
+
+### Writting data sets
+```{r,eval = FALSE}
+readA = h5read("example.h5", "foo/A")
+readB = h5read("example.h5", "foo/foobaa/B")
+readdf = h5read("example.h5", "df")
+readA
+```
+
+### Writting and reading chunks
+```{r,eval = FALSE}
+h5write(c(12, 13, 14), "example.h5", "foo/A", index = list(1:3, 1))
+h5read("example.h5", "foo/A")
+```
