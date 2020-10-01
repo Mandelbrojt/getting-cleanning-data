@@ -425,3 +425,61 @@ readA
 h5write(c(12, 13, 14), "example.h5", "foo/A", index = list(1:3, 1))
 h5read("example.h5", "foo/A")
 ```
+
+## Reading form the Web  
+**Webscraping**: programatically extracting data from the HTML code of websites.  
+###Getting data off web pages with readLines()  
+```{r, eval = FALSE}
+con = url("https://www.tutiempo.net/guadalajara.html?datos=calendario")
+htmlCode = readLines(con)
+close(con)
+htmlCode
+```
+
+### Parsing with XML  
+```{r, eval = FALSE}
+# This code is currently returning an error message
+library(XML)
+url <- "https://scholar.google.com/citations?user=HI-I6C0AAAAJ&hl=en"
+html <- htmlTreeParse(url, useInternalNodes = TRUE)
+xpathSApply(html, "//td", xmlValue)
+xpathSApply(html, "//td[@id = 'col-citedby']", xmlValue)
+```
+### GET from the httr Package  
+```{r, eval = FALSE}
+library(httr)
+url <- "https://www.tutiempo.net/guadalajara.html?datos=calendario"
+html2 = GET(url)
+content2 = content(html2, as = "text")
+parsedHTML <- htmlParse(content2, asText = TRUE)
+xpathSApply(parsedHTML, "//title", xmlValue)
+xpathSApply(parsedHTML, "//td", xmlValue)
+data <- xpathSApply(parsedHTML, "//td", xmlValue)
+variables <- data[c(267, 269, 271, 273, 275, 277, 279, 281)]
+```
+
+### Accesing websites with passwords  
+```{r, eval = FALSE}
+pg1 = GET("http://httpbin.org/basic-auth/user/passwd")
+pg1
+# Accessing into a website with an user and password
+pg2 = GET("http://httpbin.org/basic-auth/user/passwd", authenticate("user", "passwd"))
+pg2
+# Returns the components of the website
+names(pg2)
+## Returns the contents of the website
+content(pg2)
+```
+### Using handles  
+Using handles lets you "save" the authentication across multiple accesses to a website.  
+```{r, eval = FALSE}
+# Set the Google website as the handler
+google = handle("https://www.google.com/")
+pag1 = GET(handle = google, path = "/")
+pag2 = GET(handle = google, path = "search")
+```
+
+### Nothes and further resources  
+[**Web Scraping Via XPath**](https://www.r-bloggers.com/2011/11/web-scraping-yahoo-search-page-via-xpath/)  
+[**httr Package**](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html)  
+
