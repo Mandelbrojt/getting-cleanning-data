@@ -782,3 +782,50 @@ table(restData2$zipGroups)
 ### Notes and further reading  
 [Plyr Tutorial](http://had.co.nz/plyr/)  
 [Data Summarization and Manipulation](http://www.biostat.jhsph.edu/~ajaffe/lec_winterR/Lecture%202.pdf)  
+
+## Reshaping Data  
+### Melting Data Frames  
+``` {r, eval = FALSE}
+library(reshape2)
+mtcars$carname <- rownames(mtcars)
+# Melt the data frame and specify the id variables and the measure variables
+carMelt <- melt(mtcars, id = c("carname", "gear", "cyl"), measure.vars = c("mpg", "hp"))
+head(carMelt, 3)
+tail(carMelt, 3)
+```
+### Casting Data Frames  
+``` {r, eval = FALSE}
+# Cast the molten "mtcars" by specifying the rows ~ columns. By default it counts the number of measures for each variable
+cylData <- dcast(carMelt, cyl ~ variable)
+cylData
+# Cast the molten "mtcars" by specifying the rows ~ columns and adding a function to calculate the mean for each variable
+cylData <- dcast(carMelt, cyl ~ variable, mean)
+cylData
+```
+### Averaging Values within Factors  
+```{r, eval = FALSE}
+head(InsectSprays, 10)
+# Apply the sum function to the "count" column using the "spray" column as factors
+tapply(InsectSprays$count, InsectSprays$spray, sum)
+```
+### Split, Apply, Combine  
+```{r, eval = FALSE}
+# Divide the "count" column into groups defined by the "spray" column (the result object is a list)
+spIns = split(InsectSprays$count, InsectSprays$spray)
+# Apply to the splitted list the sum function
+sprCount = lapply(spIns, sum)
+# Combine the results
+unlist(sprCount)
+# Combine-Apply Method 1: the "sapply" function can also be used to apply a function to a vector or an expression object and then combine the data in just one function
+sapply(spIns, sum)
+# Combine-Apply Method 2: summarize the "InsectSprays" data set by the spray column (use ".(spray)" to omit quotation marks) and specify the function and the variable to sum by
+ddply(InsectSprays,.(spray), summarize, sum = sum(count))
+# Create a new variable using "ddply"
+spraySums <- ddply(InsectSprays,.(spray),summarize,sum = ave(count,FUN = sum))
+dim(spraySums)
+head(spraySums, 5)
+```
+### More Information  
+[plyr Tutorial](https://plyr.had.co.nz/09-user/)  
+[Reshape Tutorial](https://www.slideshare.net/jeffreybreen/reshaping-data-in-r)  
+[plyr Primer](https://www.r-bloggers.com/2011/12/a-quick-primer-on-split-apply-combine-problems/)  
